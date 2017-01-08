@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Tied up</title>
+  </head>
+  <body>
+    <p id="board" style="font-family: 'Courier New', Courier, monospace"></p>
+    <br>
+    <button onclick="socket.emit('mInc', 1);">+ for Michael</button>
+    <button onclick="socket.emit('gInc', 1);">+ for Gaby</button>
+    <br>
+    <button onclick="socket.emit('mInc', -1);">- for Michael</button>&nbsp;
+    <button onclick="socket.emit('gInc', -1);">- for Gaby</button>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      String.prototype.replaceAll = function(search, replacement) {
+        var target = this;
+        return target.split(search).join(replacement);
+      };
+      var socket = io();
+      socket.on('view-update', function(str){
+        $('#board').html(str.replaceAll('\n', '<br>').replaceAll(' ', '&nbsp;'));
+      });
+    </script>
+  </body>
+</html>
