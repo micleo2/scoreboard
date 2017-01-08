@@ -1,0 +1,31 @@
+{
+  "name": "scoreboard",
+  "version": "1.0.0",
+  "description": "A real-time scoreboard",
+  "main": "index.js",
+  "dependencies": {
+    "ascii-table": "^0.0.9",
+    "express": "^4.14.0",
+    "socket.io": "^1.7.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/micleo2/scoreboard.git"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "Michael Leon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/micleo2/scoreboard/issues"
+  },
+  "homepage": "https://github.com/micleo2/scoreboard#readme",
+  "engines": {
+    "node": "6.9.4"
+  }
+}
