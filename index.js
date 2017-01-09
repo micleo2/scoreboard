@@ -2,10 +2,10 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var asciitable = require('ascii-table')
+var fs = require("fs");
 var port = process.env.PORT || 3000;
-var mScore = 1;
-var gScore = 1;
-var curTable = buildTable(mScore, gScore);
+var scores = require("./data.json");
+var curTable = buildTable(scores.mScore, scores.gScore);
 console.log(curTable.toString());
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
@@ -16,17 +16,29 @@ io.on('connection', function(socket){
 
   socket.on('mInc', function(amt){
     console.log("michael updated");
-    mScore += amt;
-    curTable = buildTable(mScore, gScore);
+    scores.mScore += amt;
+    curTable = buildTable(scores.mScore, scores.gScore);
     io.emit('view-update', curTable.toString());
+    writeData();
   });
   socket.on('gInc', function(amt){
     console.log("Gaby updated");
-    gScore += amt;
-    curTable = buildTable(mScore, gScore);
+    scores.gScore += amt;
+    curTable = buildTable(scores.mScore, scores.gScore);
     io.emit('view-update', curTable.toString());
+    writeData();
   });
 });
+
+function writeData(){
+  fs.truncate("./data.json", 0, function(){
+    fs.writeFile("./data.json", JSON.stringify(scores), function(err){
+      if (err){
+        console.log("Error writing file: " + err);
+      }
+    })
+  });
+}
 
 function buildTable(m, g){
   t = new asciitable('Scoreboard');
