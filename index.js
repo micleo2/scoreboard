@@ -4,8 +4,23 @@ var io = require('socket.io')(http);
 var asciitable = require('ascii-table')
 var fs = require("fs");
 var port = process.env.PORT || 3000;
-var scores = require("./data.json");
+var redis = require("redis");
+var client = redis.createClient();//var client = redis.createClient(process.env.REDIS_URL);
+var scores = {mScore: "loading...", gScore: "loading..."};
+client.get("mScore", function(err, reply){
+  scores.mScore = parseInt(reply);
+  updateTable();
+});
+client.get("gScore", function(err, reply){
+  scores.gScore = parseInt(reply);
+  updateTable();
+});
+
 var curTable = buildTable(scores.mScore, scores.gScore);
+client.on("error", function (err) {
+    console.log("Error " + err);
+});
+
 console.log(curTable.toString());
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
@@ -15,29 +30,26 @@ io.on('connection', function(socket){
   io.emit('view-update', curTable.toString());
 
   socket.on('mInc', function(amt){
-    console.log("michael updated");
     scores.mScore += amt;
-    curTable = buildTable(scores.mScore, scores.gScore);
+    updateTable();
     io.emit('view-update', curTable.toString());
     writeData();
   });
   socket.on('gInc', function(amt){
-    console.log("Gaby updated");
     scores.gScore += amt;
-    curTable = buildTable(scores.mScore, scores.gScore);
+    updateTable();
     io.emit('view-update', curTable.toString());
     writeData();
   });
 });
 
 function writeData(){
-  fs.truncate("./data.json", 0, function(){
-    fs.writeFile("./data.json", JSON.stringify(scores), function(err){
-      if (err){
-        console.log("Error writing file: " + err);
-      }
-    })
-  });
+  client.set("mScore", scores.mScore, redis.print);
+  client.set("gScore", scores.gScore, redis.print);
+}
+
+function updateTable(){
+  curTable = buildTable(scores.mScore, scores.gScore);
 }
 
 function buildTable(m, g){
@@ -46,7 +58,6 @@ function buildTable(m, g){
   t.addRow(m, g);
   return t;
 }
-
 
 if (process.env.IP){
   http.listen(port, process.env.IP, function(){
