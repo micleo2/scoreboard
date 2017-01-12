@@ -5,7 +5,10 @@ var asciitable = require('ascii-table')
 var fs = require("fs");
 var port = process.env.PORT || 3000;
 var redis = require("redis");
-var client = redis.createClient();//var client = redis.createClient(process.env.REDIS_URL);
+var client = redis.createClient();
+if (process.env.REDIS_URL){
+  client = redis.createClient(process.env.REDIS_URL);
+}
 var scores = {mScore: "loading...", gScore: "loading..."};
 client.get("mScore", function(err, reply){
   scores.mScore = parseInt(reply);
