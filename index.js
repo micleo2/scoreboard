@@ -2,11 +2,10 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var asciitable = require('ascii-table')
-var fs = require("fs");
 var port = process.env.PORT || 3000;
 var mongodb = require('mongodb');
 var client = mongodb.MongoClient;
-var url = 'mongodb://localhost:27017/test'
+var url = process.env.MONGO_URL;
 var scores = {mScore: "loading...", gScore: "loading..."};
 var database;
 client.connect(url, function(err, db){
