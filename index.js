@@ -4,25 +4,32 @@ var io = require('socket.io')(http);
 var asciitable = require('ascii-table')
 var fs = require("fs");
 var port = process.env.PORT || 3000;
-var redis = require("redis");
-var client = redis.createClient();
-if (process.env.REDIS_URL){
-  client = redis.createClient(process.env.REDIS_URL);
-}
+var mongodb = require('mongodb');
+var client = mongodb.MongoClient;
+var url = 'mongodb://localhost:27017/test'
 var scores = {mScore: "loading...", gScore: "loading..."};
-client.get("mScore", function(err, reply){
-  scores.mScore = parseInt(reply);
-  updateTable();
-});
-client.get("gScore", function(err, reply){
-  scores.gScore = parseInt(reply);
-  updateTable();
+var database;
+client.connect(url, function(err, db){
+  if (err) {
+    console.log('Unable to connect to the mongoDB server. Error:', err);
+  } else {
+    console.log('Connection established to ' + url);
+    var scoreData = db.collection('scoreboard');
+    var cursor = scoreData.find({name: "michael"});
+    cursor.nextObject(function(err, item){
+      scores.mScore = item.score;
+      updateTable();
+    });
+    cursor = scoreData.find({name: "gaby"});
+    cursor.nextObject(function(err, item){
+      scores.gScore = item.score;
+      updateTable();
+    });
+    database = db;
+  }
 });
 
 var curTable = buildTable(scores.mScore, scores.gScore);
-client.on("error", function (err) {
-    console.log("Error " + err);
-});
 
 console.log(curTable.toString());
 app.get('/', function(req, res){
@@ -47,8 +54,8 @@ io.on('connection', function(socket){
 });
 
 function writeData(){
-  client.set("mScore", scores.mScore, redis.print);
-  client.set("gScore", scores.gScore, redis.print);
+  database.collection('scoreboard').update({name: "michael"}, {name: "michael", score: scores.mScore});
+  database.collection('scoreboard').update({name: "gaby"}, {name: "gaby", score: scores.gScore});
 }
 
 function updateTable(){
