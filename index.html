@@ -11,6 +11,14 @@
     <br>
     <button onclick="socket.emit('mInc', -1);">- for Michael</button>&nbsp;
     <button onclick="socket.emit('gInc', -1);">- for Gaby</button>
+    <br><br>
+    <input type="text" id="enteredItem">&nbsp;Enter in new list item</input>
+    <button onclick="addItem();">Add</button>
+    <br>
+    <h1>THE LIST</h1>
+    <ul id="thelist">
+      <li>first item <button>Delete</button></li>
+    </ul>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
@@ -21,6 +29,19 @@
       var socket = io();
       socket.on('view-update', function(str){
         $('#board').html(str.replaceAll('\n', '<br>').replaceAll(' ', '&nbsp;'));
+      });
+
+      function addItem(){
+        socket.emit("new-item", $("#enteredItem").val());
+        $("#enteredItem").val('');
+      }
+
+      socket.on("render-list", function(listItems){
+        console.log(listItems);
+        $("#thelist").html("");
+        for (var i = 0; i < listItems.length; i++){
+          $("#thelist").append("<li>" + listItems[i] + "</li>");
+        }
       });
     </script>
   </body>

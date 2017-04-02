@@ -5,10 +5,10 @@ var asciitable = require('ascii-table')
 var port = process.env.PORT || 3000;
 var mongodb = require('mongodb');
 var client = mongodb.MongoClient;
-var url = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/test';
+var url = process.env.MONGO_URL || 'mongodb://localhost:27017/test';
 var scores = {mScore: "loading...", gScore: "loading..."};
 var database;
-var theList;
+var theList = [];
 console.log(url);
 client.connect(url, function(err, db){
   if (err) {
@@ -26,10 +26,11 @@ client.connect(url, function(err, db){
       scores.gScore = item.score;
       updateTable();
     });
-    cursor = scoreData.find({name: "messages"});
-    cursor.nextObject(function(err, item){
-      theList = item;
-    });
+    // cursor = scoreData.find({name: "messages"});
+    // cursor.nextObject(function(err, item){
+    //   theList = item;
+    //   updateList();
+    // });
     database = db;
   }
 });
@@ -43,7 +44,7 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
   io.emit('view-update', curTable.toString());
-  io.emit("render-list", theList.content);
+
   socket.on('mInc', function(amt){
     scores.mScore += amt;
     updateTable();
@@ -58,9 +59,8 @@ io.on('connection', function(socket){
   });
 
   socket.on("new-item", function(item){
-    theList.content.push(item);
-    io.emit("render-list", theList.content);
-    writeListData();
+    theList.push(item);
+    io.emit("render-list", theList);
   });
 });
 
@@ -70,7 +70,7 @@ function writeTableData(){
 }
 
 function writeListData(){
-  database.collection('scoreboard').update({name: "messages"}, {name: "messages", content: theList.content});
+
 }
 
 function updateTable(){
