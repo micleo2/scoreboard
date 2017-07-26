@@ -1,0 +1,6 @@
+use test
+db.scoreboard.insertMany([
+  {name: "michael", score:1},
+  {name: "gaby", score: 1},
+  {name: "messages", content: []}
+])
