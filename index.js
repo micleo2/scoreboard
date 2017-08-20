@@ -41,7 +41,19 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
+function printMessage(){
+  var currentdate = new Date();
+  var datetime = "Serving request at " + (currentdate.getMonth()+1) + "/"
+                  + currentdate.getDate() + "/"
+                  + currentdate.getFullYear() + " @ "
+                  + currentdate.getHours() + ":"
+                  + currentdate.getMinutes() + ":"
+                  + currentdate.getSeconds();
+  console.log(datetime);
+}
+
 io.on('connection', function(socket){
+  printMessage();
   io.emit('view-update', curTable.toString());
   io.emit("render-list", theList.content);
   socket.on('mInc', function(amt){
